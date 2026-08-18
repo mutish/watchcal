@@ -1,13 +1,18 @@
-import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import express from 'express';
 import cors from 'cors';
-import {Pool} from 'pg';
 
-import authroutes from './src/routes/authroutes.js';
-
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express()
-dotenv.config();
+
+// Dynamic import to ensure dotenv is loaded first
+//import connectToPostgres from './src/db/connectToPostgres.js';
+const connectToPostgres = await import('./src/db/connectToPostgres.js').then(m => m.default);
+const authroutes = await import('./src/routes/authroutes.js').then(m => m.default);
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,54 +20,15 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-})
 
-pool.connect((err, client, release) => {
-    if(err){
-        console.error('Check your connection :(', err.stack);
-    }else {
-        console.log('Postgres says things are looking good');
-        release();
-    }
-});
-
+// Routes to be fetched
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         status:'ok',
         message:'Server is 200'
     })
 });
-
-app.use('/api/auth', authroutes);
-
-// app.get('/api/media', async(req, res) => {
-//     try{
-//         const {search, type } = req.query;
-//         let query = 'SELECT * FROM media';
-//         const params = [];
-//          if (search || type){
-//             query += ' WHERE';
-//             if(search){
-//                 params.push(`%${search}`);
-//                 query += `title ILIKE $${params.length}`;
-//          }
-//          if (type){
-//             if(search) query += ' AND';
-//             params.push(type);
-//             query += `media_type = $${params.length}`;
-//          }
-//     }
-//     query += ' ORDER BY created_at DESC';
-
-//     const result = await pool.query(query, params);
-//     res.json(result.rows);
-//     } catch(err) {
-//     console.error('Error fetching media:', err);
-//     res.status(500).json({ error: 'Internal server error' });
-//     }
-// });
+app.use("/api/auth", authroutes);
 
 app.post('/api/echo', (req, res) => {
     const { message } = req.body;
@@ -71,6 +37,11 @@ app.post('/api/echo', (req, res) => {
     });
 });
 
+// Allow frontend connection
+
+
+// DB connection...
 app.listen(PORT, () => {
+    connectToPostgres();
     console.log(`Server is running on port ${PORT}`)
 })
