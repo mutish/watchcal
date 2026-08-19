@@ -13,6 +13,7 @@ const app = express()
 //import connectToPostgres from './src/db/connectToPostgres.js';
 const connectToPostgres = await import('./src/db/connectToPostgres.js').then(m => m.default);
 const authroutes = await import('./src/routes/authroutes.js').then(m => m.default);
+const mediaroutes = await import('./src/routes/media.routes.js').then(m => m.default);
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,6 +30,7 @@ app.get('/api/health', (req, res) => {
     })
 });
 app.use("/api/auth", authroutes);
+app.use("/api/media",mediaroutes);
 
 app.post('/api/echo', (req, res) => {
     const { message } = req.body;
