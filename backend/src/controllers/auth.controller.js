@@ -60,8 +60,29 @@ export const signup = async (req, res) => {
     }
 }
 
-export const login = (req, res) => {
-    console.log('login says hi');
+export const login = async (req, res) => {
+    try {
+        const {username, password} = req.body;
+
+        const user = await User.findOneByUsername(username);
+        const isPasswordCorrect = await bcrypt.compare(password, user?.pass_hash || '');
+
+        if(!user || !isPasswordCorrect){
+            return res.status(400).json({message:"Invalid username or password"});
+        }
+
+        generateTokenandSetCookie(user.usr_id,res);
+
+        console.log("User login successfully");
+        res.status(200).json({
+            username: user.username,
+            profile: user.pfp_url
+        })
+    } catch (error) {
+        console.error("Your bad :| ->", error.message);
+        res.status(500).json({message:"Internal server error"})
+    }
+
 }
 
 export const updateProfile = async (req, res) => {
@@ -89,5 +110,15 @@ export const updateProfile = async (req, res) => {
 }
 
 export const logout = (req, res) => {
-    console.log('logout says bye');
+    try {
+        
+        res.cookie("jwt","",{maxAge:0})
+        console.log("User logged out successfully");
+        res.status(200).json({message:"Log out successfully"});
+
+    } catch (error) {
+        console.log("User failed to log out: ", error.message);
+        res.status(500).json({message:"Internal server error"});
+        
+    }
 }
