@@ -23,8 +23,8 @@ export const signup = async (req, res) => {
         const hashed_password = await bcrypt.hash(password, salt);
 
         //pfp https://avatar.iran.liara.run/public/boy
-        const maleProfilePic = `https://avatar.iran.liara.run/public/boy?usearname=${username}`
-        const femaleProfilePic= `https://avatar.iran.liara.run/public/girl?username=${username}`
+        const ProfilePic = `https://ui-avatars.com/api/?name=${username}&background=random&color=fff&size=128`;
+        //const femaleProfilePic= `https://avatar.iran.liara.run/public/girl?username=${username}`
 
         const newUser = await User.create({
             fullname,
@@ -62,6 +62,30 @@ export const signup = async (req, res) => {
 
 export const login = (req, res) => {
     console.log('login says hi');
+}
+
+export const updateProfile = async (req, res) => {
+    try {
+        const {currentUsername, newUsername} = req.body;
+        
+        const currentUser = await User.findOneByUsername(currentUsername);
+        if(!currentUser){
+            console.log("This bro doesnt even exist");
+            return res.status(404).json({message:"You dont exist, please signup"});
+        }
+        
+        const newPfp = `https://ui-avatars.com/api/?name=${newUsername}`;
+        // Pass the user ID as the first argument
+        const updatedUser = await User.updateProfile(currentUser.usr_id, newUsername, newPfp);
+        if (updatedUser) {
+            res.status(200).json({message: "Success, new name new you! Hihi"});
+        } else {
+            res.status(400).json({error: "Bruh :| its not that hard"});
+        }
+    } catch (error) {
+        console.log("Error in updateProfile controller, shame upon thou :| ->",error.message);
+        res.status(500).json({error: "Failed to update profile, internal server error"});
+    }
 }
 
 export const logout = (req, res) => {
