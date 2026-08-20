@@ -22,7 +22,7 @@ class Media {
         const cover_url = poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}`: null;
 
 
-        // TODO: look for the correct mapping
+        
         const genres = this.mapTmdbGenres(tmdbData.genre_ids);
 
         const qry = `INSERT INTO media(
@@ -91,7 +91,17 @@ class Media {
             .filter(genre => genre !== undefined);
     }
 
+    static async getMediaByGenre(genre) {
+        const qry = `SELECT * FROM media
+                    WHERE genre && $1::text[]
+                    LIMIT 20;
+                    `;
+        const { rows } = await pool.query(qry,[genre])
+        return rows[0];
+    }
+
 }
+
 
 
 export default Media;

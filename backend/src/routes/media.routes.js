@@ -1,6 +1,9 @@
 import express from 'express';
-import {} from "../controllers/media.controller.js";
+import {filterMediaByGenre} from "../controllers/media.controller.js";
 
 const router = express.Router();
 
 // routes
+router.post('/genrefilter', filterMediaByGenre);
+
+export default router;

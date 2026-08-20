@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 
+
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -30,7 +32,7 @@ app.get('/api/health', (req, res) => {
     })
 });
 app.use("/api/auth", authroutes);
-app.use("/api/media",mediaroutes);
+app.use("/api/media", mediaroutes);
 
 app.post('/api/echo', (req, res) => {
     const { message } = req.body;
