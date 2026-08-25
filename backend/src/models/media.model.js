@@ -8,7 +8,6 @@ class Media {
             name,   // tv shows
             overview:summary,
             poster_path,
-            vote_average:official_rating,
             release_date,
             first_air_date,
             media_type: tmdb_media_type,
@@ -26,17 +25,16 @@ class Media {
         const genres = this.mapTmdbGenres(tmdbData.genre_ids);
 
         const qry = `INSERT INTO media(
-                    tmdb_id, title, tmdb_media_type, genre, 
-                    cover_img_url,release_date, official_rating, summary )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    tmdb_id, title, tmdb_media_type, genre,
+                    cover_image_url, release_date, summary )
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
                     ON CONFLICT(tmdb_id)
                     DO UPDATE SET 
                         tmdb_id = EXCLUDED.tmdb_id,
                         tmdb_media_type = EXCLUDED.tmdb_media_type,
                         genre = EXCLUDED.genre,
-                        cover_img_url = EXCLUDED.cover_img_url,
+                        cover_image_url = EXCLUDED.cover_image_url,
                         release_date = EXCLUDED.release_date,
-                        official_rating = EXCLUDED.official_rating,
                         summary = EXCLUDED.summary,
                         updated_at = CURRENT_TIMESTAMP
                     RETURNING *;`;
@@ -44,12 +42,12 @@ class Media {
         // updates the current data instead of throwing an error
         const values = [
             tmdb_id, display_title, tmdb_media_type, 
-            genres, cover_url, date, official_rating, summary];
+            genres, cover_url, date, summary];
         
         const { rows } = await pool.query(qry, values);
         return rows[0];
     }
-    static async mapTmdbGenres(genre_ids){
+    static mapTmdbGenres(genre_ids){
         if (!genre_ids || !Array.isArray(genre_ids)) return [];
 
         const tmdbGenreMap = {
@@ -92,14 +90,24 @@ class Media {
     }
 
     static async getMediaByGenre(genre) {
+        const genrePatterns = genre.map(g => `%${g.trim()}%`);
+
         const qry = `SELECT * FROM media
-                    WHERE genre && $1::text[]
-                    LIMIT 20;
+                     WHERE array_to_string(genre, ' ') ILIKE ANY($1::text[]) 
+                     ORDER BY random()
+                     ;
                     `;
         const { rows } = await pool.query(qry,[genre])
         return rows[0];
     }
 
+    // searchbar function
+    static async filterMediaByTitle(title) {
+        const qry = `SELECT * FROM media
+                     WHERE title ILIKE $1;`
+        const { rows } = await pool.query(qry, [`%${title}%`]);
+        return rows;
+    }
 }
 
 

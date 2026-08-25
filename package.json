@@ -5,7 +5,8 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "server": "nodemon backend/server.js"
+    "server": "nodemon backend/server.js",
+    "seed": "nodemon backend/src/scripts/bulkSeed.js"
   },
   "repository": {
     "type": "git",
