@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 
 
@@ -16,12 +17,15 @@ const app = express()
 const connectToPostgres = await import('./src/db/connectToPostgres.js').then(m => m.default);
 const authroutes = await import('./src/routes/authroutes.js').then(m => m.default);
 const mediaroutes = await import('./src/routes/media.routes.js').then(m => m.default);
+const usermediaroutes = await import('./src/routes/usermedia.routes.js').then(m => m.default);
+const scheduleroutes = await import('./src/routes/schedule.routes.js').then(m => m.default);
 
 const PORT = process.env.PORT || 3000;
 
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 
 // Routes to be fetched
@@ -33,6 +37,8 @@ app.get('/api/health', (req, res) => {
 });
 app.use("/api/auth", authroutes);
 app.use("/api/media", mediaroutes);
+//app.use("/api/um/",usermediaroutes);
+app.use("/api/plan", scheduleroutes);
 
 app.post('/api/echo', (req, res) => {
     const { message } = req.body;

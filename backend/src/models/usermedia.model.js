@@ -1,4 +1,4 @@
-import { pool } from '../db.js';
+import { pool } from "../db/connectToPostgres.js";
 class usrMedia {
     static async addFavorite(value) { 
         const qry = `ALTER TABLE user_media
@@ -15,6 +15,8 @@ class usrMedia {
         const { rows } = await pool.query(qry);
         return rows;
     }
+    // change status
+    
 }
 
 export default usrMedia;

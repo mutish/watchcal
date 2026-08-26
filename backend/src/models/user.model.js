@@ -2,12 +2,12 @@ import { pool } from "../db/connectToPostgres.js";
 
 class User {
   // new user
-  static async create({fullname, username, email, pass_hash, gender, pfp_url=""}) {
-    const qry = `INSERT INTO users(fullname, username, email, pass_hash, gender, pfp_url)
+  static async create({fullname, username, email, password, gender, pfp_url=""}) {
+    const qry = `INSERT INTO users(fullname, username, email, password, gender, pfp_url)
                  VALUES($1, $2, $3, $4, $5, $6)
                  RETURNING *; 
                  `;
-    const values = [fullname, username, email, pass_hash, gender, pfp_url]
+    const values = [fullname, username, email, password, gender, pfp_url]
     const { rows } = await pool.query(qry, values)
     return rows[0];
   }

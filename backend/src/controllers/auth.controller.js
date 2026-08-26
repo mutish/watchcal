@@ -30,9 +30,9 @@ export const signup = async (req, res) => {
             fullname,
             username,
             email,
-            pass_hash: hashed_password,
+            password: hashed_password,
             gender,
-            pfp_url: gender === "male" ? maleProfilePic : femaleProfilePic
+            pfp_url: ProfilePic   
         })
 
         if (newUser){
@@ -65,7 +65,7 @@ export const login = async (req, res) => {
         const {username, password} = req.body;
 
         const user = await User.findOneByUsername(username);
-        const isPasswordCorrect = await bcrypt.compare(password, user?.pass_hash || '');
+        const isPasswordCorrect = await bcrypt.compare(password, user?.password || '');
 
         if(!user || !isPasswordCorrect){
             return res.status(400).json({message:"Invalid username or password"});
